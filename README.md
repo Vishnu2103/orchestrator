@@ -1,25 +1,35 @@
+Here is the formatted `README.md` with additional necessary details:
+
 # Local Setup
 
-
-[For Architecture refer] - > /docs/Architecture.md
+[For Architecture refer] - > [/docs/Architecture.md](docs/Architecture.md)
 
 #### Requirements
 
 - Python > 3.9
 
 ### Initial Setup and Starting Server
-```python
 
+```bash
+# Create a virtual environment
 python -m venv venvfreshflow
-python venvfreshflow/source/bin/activate
 
+# Activate the virtual environment
+source venvfreshflow/bin/activate
+
+# Install required packages
 pip install -r requirements.txt
 
-redis-server (before this install redis locally with -> brew install redis)
+# Install and start Redis server
+brew install redis
+redis-server
+
+# Run the API server
 python -m api.run
 ```
 
-### Sample Request for Create/Run a Workflow(Canvas)
+### Sample Request for Create/Run a Workflow (Canvas)
+
 ```bash
 curl --location 'http://localhost:8000/api/workflow' \
 --header 'Content-Type: application/json' \
@@ -86,15 +96,18 @@ curl --location 'http://localhost:8000/api/workflow' \
         }
     }
 }'
-
 ```
 
 ### To Check Status of the workflow
+
 ```bash
 curl --location --globoff 'http://localhost:8000/api/workflow/{{workflow_id}}/status'
 ```
 
 ### For streaming workflow updates
+
 ```bash
 curl --location --globoff 'http://localhost:8000/api/workflow/{{workflow_id}}/stream'
 ```
+
+You can replace `{{workflow_id}}` with the actual workflow ID to check the status and stream updates.
