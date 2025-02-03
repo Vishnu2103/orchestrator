@@ -14,6 +14,8 @@ python -m venv venvfreshflow
 python venvfreshflow/source/bin/activate
 
 pip install -r requirements.txt
+
+redis-server (before this install redis locally with -> brew install redis)
 python -m api.run
 ```
 
