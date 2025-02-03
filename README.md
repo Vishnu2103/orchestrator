@@ -10,8 +10,8 @@
 ### Initial Setup and Starting Server
 ```python
 
-python -m venv venv
-python venv1/source/bin/activate
+python -m venv venvfreshflow
+python venvfreshflow/source/bin/activate
 
 pip install -r requirements.txt
 python -m api.run
