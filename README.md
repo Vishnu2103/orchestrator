@@ -1,4 +1,3 @@
-Here is the formatted `README.md` with additional necessary details:
 
 # Local Setup
 
