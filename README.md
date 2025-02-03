@@ -2,7 +2,7 @@ Here is the formatted `README.md` with additional necessary details:
 
 # Local Setup
 
-[For Architecture refer] - > [/docs/Architecture.md](docs/Architecture.md)
+[For Architecture refer] - > [/docs/Architecture.md](docs/ARCHITECTURE.md)
 
 #### Requirements
 
