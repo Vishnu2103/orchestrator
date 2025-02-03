@@ -1,0 +1,41 @@
+{
+    "canvas_name": "qa_retrieval_pipeline",
+    "modules": {
+        "user_input": {
+            "identifier": "user_input",
+            "user_config": {
+                "prompt": "Enter your question about Freshflow: "
+            }
+        },
+        "vector_retriever": {
+            "identifier": "vector_retriever",
+            "user_config": {
+                "model": "sentence-transformers/all-mpnet-base-v2",
+                "index_name": "freshflow-docs",
+                "namespace": "documentation",
+                "top_k": 3,
+                "input_query": {
+                    "module_id": "user_input",
+                    "output_key": "query"
+                }
+            }
+        },
+        "openai_handler": {
+            "identifier": "openai_handler",
+            "user_config": {
+                "model": "gpt-4-turbo-preview",
+                "temperature": 0.7,
+                "max_tokens": 500,
+                "system_prompt": "You are a helpful AI assistant specialized in answering questions about Freshflow's documentation. Your task is to provide accurate, concise answers based on the provided context. If the context doesn't contain sufficient information to answer the question, clearly state that. Always maintain a professional and helpful tone.",
+                "input_query": {
+                    "module_id": "user_input",
+                    "output_key": "query"
+                },
+                "input_contexts": {
+                    "module_id": "vector_retriever",
+                    "output_key": "contexts"
+                }
+            }
+        }
+    }
+} 
