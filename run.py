@@ -1,5 +1,6 @@
 import uvicorn
 import os
+from api import main
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -18,4 +19,4 @@ if __name__ == "__main__":
         port=port,
         reload=reload,
         log_level="info"
-    ) 
+    )
