@@ -1,0 +1,6 @@
+freshflow/lib
+*.pyc
+*.rdb
+workflow_configuration/tasks/__pycache__/handlers.cpython-39.pyc
+dump.rdb
+/venvfreshflow
