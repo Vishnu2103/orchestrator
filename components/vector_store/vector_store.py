@@ -10,6 +10,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.connection import create_ssl_context
 import ssl
 from opensearchpy import OpenSearch
+from urllib.parse import urlparse
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -57,10 +58,18 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
+                    parsed_url = urlparse(es_host)
                     self.store = OpenSearch(
-                                [es_host],
-                                verify_certs=False
-                            )
+                        [
+                            {
+                                "host": parsed_url.hostname,
+                                "port": parsed_url.port or 443,
+                                "scheme": parsed_url.scheme,
+                            }
+                        ],
+                        verify_certs=False,
+                        http_auth=None
+                    )
                 self.store.cluster.health()
                 logger.info("Successfully initialized OpenSearch client")
                 self.store_vectors_func = self.store_vectors_os
