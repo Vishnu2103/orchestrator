@@ -4,3 +4,5 @@ freshflow/lib
 workflow_configuration/tasks/__pycache__/handlers.cpython-39.pyc
 dump.rdb
 /venvfreshflow
+.idea
+freshflow/engine/__pycache__/
