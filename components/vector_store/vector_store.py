@@ -66,9 +66,7 @@ class VectorStore:
                                 "port": parsed_url.port or 443,
                                 "scheme": parsed_url.scheme,
                             }
-                        ],
-                        verify_certs=False,
-                        http_auth=None
+                        ]
                     )
                 self.store.cluster.health()
                 logger.info("Successfully initialized OpenSearch client")
