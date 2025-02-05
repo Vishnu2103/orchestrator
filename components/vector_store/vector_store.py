@@ -57,16 +57,18 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
-                    ssl_context = ssl.create_default_context()
-                    ssl_context.check_hostname = False
-                    ssl_context.verify_mode = ssl.CERT_NONE
-                    self.store = OpenSearch(
+                    es_username = config("ES_USERNAME", default=None)
+                    es_password = config("ES_PASSWORD", default=None)
+                    if es_username and es_password:
+                        es_credentials = (es_username, es_password)
+                    else:
+                        es_credentials = ()
+                    self.store = Elasticsearch(
                         [es_host],
-                        verify_certs=False,
-                        ssl_context=ssl_context
+                        http_auth=es_credentials
                     )
-                self.store.cluster.health()
-                logger.info("Successfully initialized OpenSearch client")
+                self.store.cluster.health(wait_for_status="yellow")
+                logging.info("Successfully connected to OpenSearch!")
                 self.store_vectors_func = self.store_vectors_os
             except Exception as e:
                 logger.error(f"Error initializing OpenSearch client: {str(e)}")
