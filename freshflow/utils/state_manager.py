@@ -55,7 +55,7 @@ class StateManager:
             raise ValueError(f"No output found for task {task_ref}")
             
         # Get value from output dictionary
-        logger.info(f"Task output: {task_output} Expected key: {output_key}" )
+        logger.debug(f"Task output: {task_output} Expected key: {output_key}" )
         if 'output' not in task_output:
             raise ValueError(f"No output dictionary found in task {task_ref} result")
             

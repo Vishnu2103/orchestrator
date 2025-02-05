@@ -38,6 +38,7 @@ class EmbeddingsGenerator:
         return self.model.encode(batch)
 
     def _encode_with_labse(self, batch: List[str]) -> List[np.ndarray]:
+        logger.info(f"Encoding {batch} texts with LaBSE")
         response = requests.post(
             'https://fd-freddy-serv.cxbu.staging.freddyproject.com/embedding/api/v1/1/embed-labse',
             headers={'Content-Type': 'application/json'},

@@ -30,7 +30,7 @@ class DownloadTaskHandler(TaskHandler):
                 identifier='s3_downloader',
                 user_config=task_input.get('user_config', {})
             )
-            
+
             downloader = S3Downloader(config)
             content = downloader.download_file()
             
@@ -157,7 +157,7 @@ class EmbeddingTaskHandler(TaskHandler):
                 }
             }
 
-@TaskHandlerRegistry.register('vector_store')
+@TaskHandlerRegistry.register('pincecone')
 class VectorStoreTaskHandler(TaskHandler):
     def execute(self, task_input: Dict) -> Dict:
         try:
@@ -166,7 +166,8 @@ class VectorStoreTaskHandler(TaskHandler):
                 identifier='vector_store',
                 user_config=task_input.get('user_config', {})
             )
-            
+
+            config.user_config['database'] = 'pinecone'
             # Get inputs from user_config references
             embeddings = task_input.get('user_config', {}).get('input_vectors')
             chunks = task_input.get('user_config', {}).get('input_chunks')
@@ -180,6 +181,46 @@ class VectorStoreTaskHandler(TaskHandler):
             vector_store = VectorStore(config)
             vector_store.store_vectors(embeddings_arrays, chunks)
             
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'message': 'Vectors stored successfully'
+                }
+            }
+        except Exception as e:
+            logger.error(f"Vector store task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('opensearch')
+class VectorStoreTaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'store_001'),
+                identifier='vector_store',
+                user_config=task_input.get('user_config', {})
+            )
+
+            config.user_config['database'] = 'opensearch'
+            # Get inputs from user_config references
+            embeddings = task_input.get('user_config', {}).get('input_vectors')
+            chunks = task_input.get('user_config', {}).get('input_chunks')
+
+            if not embeddings or not chunks:
+                raise ValueError("Missing embeddings or chunks for vector storage")
+
+            # Convert lists back to numpy arrays
+            embeddings_arrays = [np.array(emb) for emb in embeddings]
+
+            vector_store = VectorStore(config)
+            vector_store.store_vectors(embeddings_arrays, chunks)
+
             return {
                 'status': 'COMPLETED',
                 'output': {
