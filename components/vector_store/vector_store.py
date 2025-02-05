@@ -9,8 +9,7 @@ from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from elasticsearch.connection import create_ssl_context
 import ssl
-import boto3
-from opensearchpy import OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
+from opensearchpy import OpenSearch
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -58,21 +57,8 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
-                    session = boto3.Session()
-                    credentials = session.get_credentials()
-                    auth = AWSV4SignerAuth(credentials, "us-east-1", "es")
-                    else:
-                        es_credentials = ()
-                        ssl_context = create_ssl_context()
-                        ssl_context.check_hostname = False
-                        ssl_context.verify_mode = ssl.CERT_NONE
-                        self.store = OpenSearch(
-                            hosts=[es_host],
-                            http_auth=auth,
-                            use_ssl=True,
-                            verify_certs=True,
-                            connection_class=RequestsHttpConnection
-                        )
+                    es_credentials = ()
+                    self.store = Elasticsearch([ES_HOST], http_auth=es_credentials)
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
                 self.store_vectors_func = self.store_vectors_os
