@@ -63,9 +63,14 @@ class VectorStore:
                         es_credentials = (es_username, es_password)
                     else:
                         es_credentials = ()
+                    ssl_context = create_ssl_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
                     self.store = Elasticsearch(
                         [es_host],
-                        http_auth=es_credentials
+                        http_auth=es_credentials,
+                        verify_certs=False,
+                        ssl_context=ssl_context
                     )
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
