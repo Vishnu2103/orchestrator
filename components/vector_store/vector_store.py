@@ -57,7 +57,7 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
-                    self.store = OpenSearch([es_host])
+                    self.store = OpenSearch([es_host], verify_certs=True)
                 self.store.cluster.health()
                 logger.info("Successfully initialized OpenSearch client")
                 self.store_vectors_func = self.store_vectors_os
