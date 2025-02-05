@@ -134,8 +134,13 @@ class EmbeddingTaskHandler(TaskHandler):
             embeddings = embedder.generate_embeddings(chunks)
             
             # Convert numpy arrays to lists for JSON serialization
-            embeddings_list = [emb.tolist() for emb in embeddings]
-            
+            if config.user_config['model'] == 'all-minilm-l6-v2':
+                embeddings_list = [emb.tolist() for emb in embeddings]
+            else:
+                embeddings_list = embeddings
+
+            logger.info(f"Generated {embeddings_list} embeddings")
+
             return {
                 'status': 'COMPLETED',
                 'output': {

@@ -7,6 +7,8 @@ from pinecone import Pinecone
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
+from components.embedder import EmbeddingsGenerator
+
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,8 @@ class VectorRetriever:
         logger.info(f"Initializing vector retriever")
         
         # Initialize embedding model
-        self.model = SentenceTransformer(config.user_config['model'])
-        logger.info(f"Loaded embedding model: {config.user_config['model']}")
+        # self.model = SentenceTransformer(config.user_config['model'])
+        # logger.info(f"Loaded embedding model: {config.user_config['model']}")
         
         # Initialize Pinecone
         api_key = os.getenv('PINECONE_API_KEY')
@@ -40,12 +42,16 @@ class VectorRetriever:
         
         try:
             # Generate query embedding
-            query_embedding = self.model.encode(query)
+            embedder = EmbeddingsGenerator(self.config)
+            query_embedding = embedder.generate_embeddings([query])[0]
             logger.info(f"Generated query embedding")
-            
+
+            if self.config.user_config['model'] == 'all-minilm-l6-v2':
+                query_embedding = query_embedding.tolist()
+
             # Search in Pinecone
             results = self.index.query(
-                vector=query_embedding.tolist(),
+                vector=query_embedding,
                 top_k=top_k,
                 namespace=self.config.user_config['namespace'],
                 include_metadata=True
