@@ -566,6 +566,44 @@ class OpenAITaskHandler(TaskHandler):
                 user_config=task_input.get('user_config', {})
             )
 
+            config.user_config['platform'] = 'openai'
+            # Get inputs from user_config references
+            query = task_input.get('user_config', {}).get('input_query')
+            contexts = task_input.get('user_config', {}).get('input_contexts')
+            logger.info(f"Query: {query}, Contexts: {contexts}")
+            if not query or not contexts:
+                raise ValueError("Missing query or contexts for OpenAI handler")
+
+            handler = OpenAIHandler(config)
+            response = handler.generate_response(query, contexts)
+            logger.info(f"Generated openai_handler response: {response}")
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'response': response
+                }
+            }
+        except Exception as e:
+            logger.error(f"OpenAI task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('deepseek_handler')
+class OpenAITaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'openai_001'),
+                identifier='openai_handler',
+                user_config=task_input.get('user_config', {})
+            )
+
+            config.user_config['platform'] = 'deepseek'
             # Get inputs from user_config references
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')

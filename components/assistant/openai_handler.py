@@ -18,11 +18,19 @@ class ModuleConfig:
 class OpenAIHandler:
     def __init__(self, config: ModuleConfig):
         self.config = config
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable not set")
-        
-        self.client = OpenAI(api_key=api_key)
+        platform = config.user_config.get('platform')
+
+        if platform == 'openai':
+            api_key = os.getenv('OPENAI_API_KEY')
+            api_url = None
+        elif platform == 'deepseek':
+            api_key = os.getenv('DEEPSEEK_API_KEY')
+            api_url = os.getenv('DEEPSEEK_API_URL')
+        else:
+            raise ValueError("Unsupported platform specified")
+
+        logger.info(f"Initializing OpenAI client with API {api_key} {api_url}")
+        self.client = OpenAI(api_key=api_key, base_url=api_url)
         logger.info(f"Initialized OpenAI client with model: {config.user_config['model']}")
         
         self.system_prompt = config.user_config.get('system_prompt', 
@@ -58,7 +66,7 @@ Please provide a response based on the above context."""}
                 temperature=self.config.user_config.get('temperature', 0.7),
                 max_tokens=self.config.user_config.get('max_tokens', 500)
             )
-            
+            logger.info(f"Generated response: {response}")
             answer = response.choices[0].message.content
             
             completion_time = time.time() - start_time
