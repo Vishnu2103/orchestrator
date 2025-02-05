@@ -60,6 +60,7 @@ class VectorRetriever:
         pc = Pinecone(api_key=api_key)
         logger.info("Successfully initialized Pinecone client")
 
+        logger.info(f"Connecting to index: {self.config.user_config['index_name']} {api_key}")
         # Get the index
         self.store = pc.Index(self.config.user_config['index_name'])
         logger.info(f"Successfully connected to index: {self.config.user_config['index_name']}")
@@ -122,7 +123,7 @@ class VectorRetriever:
 
     def search_pinecone(self, query_embedding: np.ndarray, top_k: int) -> List[Dict]:
         results = self.store.query(
-            vector=query_embedding.tolist(),
+            vector=query_embedding,
             top_k=top_k,
             namespace=self.config.user_config['namespace'],
             include_metadata=True
