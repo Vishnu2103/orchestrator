@@ -60,7 +60,7 @@ class VectorStore:
                     ssl_context = ssl.create_default_context()
                     ssl_context.check_hostname = False
                     ssl_context.verify_mode = ssl.CERT_NONE
-                    client = OpenSearch(
+                    self.store = OpenSearch(
                         [es_host],
                         verify_certs=False,
                         ssl_context=ssl_context
