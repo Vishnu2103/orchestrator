@@ -8,6 +8,7 @@ import time
 from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from elasticsearch.connection import create_ssl_context
+import ssl
 from opensearchpy import OpenSearch
 
 load_dotenv()
@@ -46,10 +47,14 @@ class VectorStore:
                 es_host = os.getenv('ES_HOST')
                 dev_mode = os.getenv('DEV_MODE')
                 if dev_mode:
+                    ssl_context = create_ssl_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
                     self.store = OpenSearch(
                         [es_host],
                         http_auth=("admin", "admin"),
-                        verify_certs=False
+                        verify_certs=False,
+                        ssl_context=ssl_context,
                     )
                 else:
                     es_username = config("ES_USERNAME", default=None)
