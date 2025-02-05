@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from elasticsearch.connection import create_ssl_context
 import ssl
-from opensearchpy import OpenSearch
+import boto3
+from opensearchpy import OpenSearch, RequestsHttpConnection, AWSV4SignerAuth
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -57,21 +58,21 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
-                    es_username = config("ES_USERNAME", default=None)
-                    es_password = config("ES_PASSWORD", default=None)
-                    if es_username and es_password:
-                        es_credentials = (es_username, es_password)
+                    session = boto3.Session()
+                    credentials = session.get_credentials()
+                    auth = AWSV4SignerAuth(credentials, "us-east-1", "es")
                     else:
                         es_credentials = ()
-                    ssl_context = create_ssl_context()
-                    ssl_context.check_hostname = False
-                    ssl_context.verify_mode = ssl.CERT_NONE
-                    self.store = Elasticsearch(
-                        [es_host],
-                        http_auth=es_credentials,
-                        verify_certs=False,
-                        ssl_context=ssl_context
-                    )
+                        ssl_context = create_ssl_context()
+                        ssl_context.check_hostname = False
+                        ssl_context.verify_mode = ssl.CERT_NONE
+                        self.store = OpenSearch(
+                            hosts=[es_host],
+                            http_auth=auth,
+                            use_ssl=True,
+                            verify_certs=True,
+                            connection_class=RequestsHttpConnection
+                        )
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
                 self.store_vectors_func = self.store_vectors_os
