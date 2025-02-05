@@ -106,9 +106,9 @@ class VectorRetriever:
                 query_embedding = query_embedding.tolist()
 
             if self.config.user_config['search'] == 'pinecone':
-                contexts = self.search_pinecone(query_embedding, top_k)
+                contexts = self.search_pinecone(query, query_embedding, top_k)
             elif self.config.user_config['search'] == 'opensearch':
-                contexts = self.search_opensearch(query_embedding, top_k)
+                contexts = self.search_opensearch(query, query_embedding, top_k)
             else:
                 raise ValueError(f"Unsupported database: {self.config.user_config['database']}")
 
@@ -121,13 +121,23 @@ class VectorRetriever:
             logger.error(f"Error retrieving context: {str(e)}")
             raise
 
-    def search_pinecone(self, query_embedding: np.ndarray, top_k: int) -> List[Dict]:
-        results = self.store.query(
-            vector=query_embedding,
-            top_k=top_k,
-            namespace=self.config.user_config['namespace'],
-            include_metadata=True
-        )
+    def search_pinecone(self, query: str, query_embedding: np.ndarray, top_k: int) -> List[Dict]:
+        if self.config.user_config['type'] == 'semantic':
+            results = self.store.query(
+                vector=query_embedding,
+                top_k=top_k,
+                namespace=self.config.user_config['namespace'],
+                include_metadata=True
+            )
+        elif self.config.user_config['type'] == 'keyword':
+            results = self.store.query(
+                query=query,
+                top_k=top_k,
+                namespace=self.config.user_config['namespace'],
+                include_metadata=True
+            )
+        else:
+            raise ValueError(f"Unsupported search type: {self.config.user_config['type']}")
 
         contexts = []
         for match in results.matches:
@@ -138,34 +148,57 @@ class VectorRetriever:
 
         return contexts
 
-    def search_opensearch(self, query_embedding: np.ndarray, top_k: int) -> List[Dict]:
-        query = {
-            "size": top_k,
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "knn": {
-                                "vector": {
-                                    "vector": query_embedding,
-                                    "k": top_k
+    def search_opensearch(self, query: str, query_embedding: np.ndarray, top_k: int) -> List[Dict]:
+        if self.config.user_config['type'] == 'semantic':
+            query_body = {
+                "size": top_k,
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "knn": {
+                                    "vector": {
+                                        "vector": query_embedding,
+                                        "k": top_k
+                                    }
+                                }
+                            },
+                            {
+                                "term": {
+                                    "namespace": self.config.user_config['namespace']
                                 }
                             }
-                        },
-                        {
-                            "term": {
-                                "namespace": self.config.user_config['namespace']
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 }
             }
-        }
+        elif self.config.user_config['type'] == 'keyword':
+            query_body = {
+                "size": top_k,
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "match": {
+                                    "text": query
+                                }
+                            },
+                            {
+                                "term": {
+                                    "namespace": self.config.user_config['namespace']
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        else:
+            raise ValueError(f"Unsupported search type: {self.config.user_config['type']}")
 
-        logger.info(f"Executing OpenSearch query: {query}")
+        logger.info(f"Executing OpenSearch query: {query_body}")
         response = self.store.search(
             index=self.config.user_config['index_name'],
-            body=query
+            body=query_body
         )
 
         logger.info(response)

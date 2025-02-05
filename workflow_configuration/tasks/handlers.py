@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 from components.chunker.LineChunker import LineChunker
 from components.chunker.SentenceSplitter import SentenceSplitter
+from components.language_component.detect_language import DetectLanguage, TranslateLanguage
 from freshflow.models.task_handler import TaskHandler
 from components.downloader import S3Downloader
 from components.chunker import DocumentChunker
@@ -532,6 +533,7 @@ class VectorRetrieverTaskHandler(TaskHandler):
 
             # Get query from user_config's input_query reference
             query = task_input.get('user_config', {}).get('input_query')
+
             if not query:
                 raise ValueError("No query provided for vector retrieval")
 
@@ -567,13 +569,13 @@ class OpenAITaskHandler(TaskHandler):
             # Get inputs from user_config references
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')
-
+            logger.info(f"Query: {query}, Contexts: {contexts}")
             if not query or not contexts:
                 raise ValueError("Missing query or contexts for OpenAI handler")
 
             handler = OpenAIHandler(config)
             response = handler.generate_response(query, contexts)
-
+            logger.info(f"Generated openai_handler response: {response}")
             return {
                 'status': 'COMPLETED',
                 'output': {
@@ -582,6 +584,76 @@ class OpenAITaskHandler(TaskHandler):
             }
         except Exception as e:
             logger.error(f"OpenAI task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('detect_language')
+class DetectLanguageTaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'detect_language_001'),
+                identifier='detect_language',
+                user_config=task_input.get('user_config', {})
+            )
+
+            # Get texts from user_config's input_texts reference
+            texts = task_input.get('user_config', {}).get('input_query')
+            if not texts:
+                raise ValueError("No texts provided for language detection")
+
+            detector = DetectLanguage(config)
+            detected_language = detector.detect_language([texts])
+            logger.info(f"Detected language: {detected_language}")
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'detected_language': detected_language
+                }
+            }
+        except Exception as e:
+            logger.error(f"Language detection task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('translate_language')
+class TranslateLanguageTaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'translate_language_001'),
+                identifier='translate_language',
+                user_config=task_input.get('user_config', {})
+            )
+
+            # Get texts, source_language, and target_language from user_config references
+            texts = task_input.get('user_config', {}).get('input_contexts')
+            target_language = task_input.get('user_config', {}).get('input_query')
+            logger.info(f"Translating {texts} to {target_language}")
+            if not texts or not target_language:
+                raise ValueError("Missing texts, source language, or target language for translation")
+
+            translator = TranslateLanguage(config)
+            translated_text = translator.translate_language([texts], target_language)
+
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'translated_text': translated_text
+                }
+            }
+        except Exception as e:
+            logger.error(f"Translation task failed: {str(e)}")
             return {
                 'status': 'FAILED',
                 'output': {
