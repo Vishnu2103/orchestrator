@@ -9,11 +9,17 @@ logger = logging.getLogger(__name__)
 
 class StateStore:
     """Manages workflow state using Redis"""
-    
-    def __init__(self, redis_url: str = "redis://localhost:6379"):
+
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    redis_password = os.getenv("REDIS_PASSWORD", None)
+    def __init__(self, redis_url):
         """Initialize state store with Redis connection"""
         try:
-            self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
+            self.redis = redis.Redis.from_url(
+                            redis_url,
+                            password=redis_password,
+                            decode_responses=True
+                        )
             logger.info("Connected to Redis successfully")
         except redis.ConnectionError as e:
             logger.error(f"Failed to connect to Redis: {e}")
