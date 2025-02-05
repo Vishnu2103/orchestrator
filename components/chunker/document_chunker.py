@@ -22,6 +22,11 @@ class DocumentChunker:
         self.config = config
         logger.info(f"Initializing document chunker with chunk size: {config.user_config['chunk_size']}, "
                     f"overlap: {config.user_config['chunk_overlap']}")
+        self.splitter = RecursiveCharacterTextSplitter(
+            chunk_size=config.user_config['chunk_size'],
+            chunk_overlap=config.user_config['chunk_overlap']
+        )
+
         self.splitting_strategy = config.user_config['splitting_strategy']
         if self.splitting_strategy == 'text_splitter':
             self.splitter = RecursiveCharacterTextSplitter(

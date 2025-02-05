@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List, Dict, Any
 from dataclasses import dataclass
 import numpy as np
@@ -27,7 +28,8 @@ class EmbeddingsGenerator:
             self.model_handlers = {
                 'all-minilm-l6-v2': self._encode_with_all_minilm_l6_v2,
                 'labse-sentence-embedding': self._encode_with_labse,
-                'bge-m3': self._encode_with_bgem3
+                'bge-m3': self._encode_with_bgem3,
+                'text-embedding-3-large': self._encode_with_openai
             }
         except Exception as e:
             logger.error(f"Error initializing EmbeddingsGenerator: {str(e)}")
@@ -46,6 +48,22 @@ class EmbeddingsGenerator:
         )
         if response.status_code == 200:
             return response.json()['embeddings']
+        else:
+            raise ValueError(f"Error from embedding API: {response.status_code} {response.text}")
+
+    def _encode_with_openai(self, batch: List[str]) -> List[np.ndarray]:
+        logger.info(f"Encoding {batch} texts with OpenAI")
+        response = requests.post(
+            'https://platforms-eastus-ai-stage07.openai.azure.com/openai/deployments/text-embedding-3-large-1/embeddings?api-version=2024-02-01',
+            headers={
+                'Content-Type': 'application/json',
+                'api-key': os.getenv('AZURE_KEY')
+            },
+            json={'input': batch}
+        )
+        if response.status_code == 200:
+            embeddings = [item['embedding'] for item in response.json()['data']]
+            return embeddings
         else:
             raise ValueError(f"Error from embedding API: {response.status_code} {response.text}")
 
