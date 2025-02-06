@@ -45,7 +45,7 @@ class VectorStore:
                 self.store = None
                 logger.info(f"Initializing AWS OpenSearch with index: {config.user_config['index_name']}")
                 es_host = os.getenv('ES_HOST')
-                dev_mode = os.getenv('DEV_MODE')
+                dev_mode = os.getenv('DEV_MODE', 'false').lower() == 'true'
                 if dev_mode:
                     ssl_context = create_ssl_context()
                     ssl_context.check_hostname = False
