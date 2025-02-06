@@ -6,9 +6,9 @@ from dataclasses import dataclass
 import time
 from dotenv import load_dotenv
 
-
 load_dotenv()
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ModuleConfig:
@@ -104,7 +104,7 @@ class ActionHandler:
                                 "top_k": 3,
                                 "input_query": {
                                     "module_id": "user_input",
-                                    "output_key": "query"
+                                    "output_key": "input"
                                 }
                             }
                         },
@@ -117,7 +117,7 @@ class ActionHandler:
                                 "system_prompt": "You are a helpful AI assistant specialized in answering questions about Freshflow's documentation. Your task is to provide accurate, concise answers based on the provided context. If the context doesn't contain sufficient information to answer the question, clearly state that. Always maintain a professional and helpful tone.",
                                 "input_query": {
                                     "module_id": "user_input",
-                                    "output_key": "query"
+                                    "output_key": "input"
                                 },
                                 "input_contexts": {
                                     "module_id": "vector_retriever",
@@ -131,7 +131,7 @@ class ActionHandler:
                                 "platform": "azure",
                                 "input_query": {
                                     "module_id": "user_input",
-                                    "output_key": "query"
+                                    "output_key": "input"
                                 }
                             }
                         },
