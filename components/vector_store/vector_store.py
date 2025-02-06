@@ -57,8 +57,7 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
-                    es_credentials = ()
-                    self.store = OpenSearch([es_host], http_auth=es_credentials)
+                    self.store = OpenSearch([es_host])
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
                 self.store_vectors_func = self.store_vectors_os
