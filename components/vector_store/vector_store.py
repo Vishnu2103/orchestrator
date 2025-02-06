@@ -12,7 +12,7 @@ import ssl
 import boto3
 from botocore.exceptions import NoCredentialsError
 from requests_aws4auth import AWS4Auth
-from opensearchpy import OpenSearch
+from opensearchpy import OpenSearch, RequestsHttpConnection
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -69,12 +69,12 @@ class VectorStore:
                         "es",
                         session_token=credentials.token
                     )
-                     self.store = OpenSearch(
-                        hosts=[es_host],
+                    self.store = OpenSearch(
+                        [es_host],
                         http_auth=auth,
                         use_ssl=True,
                         verify_certs=True,
-                        connection_class=None
+                        connection_class=RequestsHttpConnection
                     ))
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
