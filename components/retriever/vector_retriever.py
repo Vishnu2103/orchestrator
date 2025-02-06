@@ -71,7 +71,7 @@ class VectorRetriever:
             self.store = None
             logger.info(f"Initializing AWS OpenSearch with index: {self.config.user_config['index_name']}")
             es_host = os.getenv('ES_HOST')
-            dev_mode = os.getenv('DEV_MODE')
+            dev_mode = os.getenv('DEV_MODE', 'false').lower() == 'true'
             if dev_mode:
                 ssl_context = create_ssl_context()
                 ssl_context.check_hostname = False
@@ -83,7 +83,11 @@ class VectorRetriever:
                     ssl_context=ssl_context,
                 )
             else:
-                self.store = OpenSearch([es_host], http_auth=())
+                self.store = OpenSearch(
+                    hosts = [es_host],
+                    use_ssl = True
+                )
+                logger.info(f"self.store staging: {self.store}")
             self.store.cluster.health()
             logger.info("Successfully initialized OpenSearch client")
         except Exception as e:
