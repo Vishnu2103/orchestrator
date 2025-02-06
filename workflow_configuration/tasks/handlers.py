@@ -826,6 +826,7 @@ class ActionTaskHandler(TaskHandler):
 
             # Get texts from user_config's input_texts reference
             json_string = task_input.get('user_config', {}).get('input_contexts')
+            query = task_input.get('user_config', {}).get('input_query')
             if not json_string:
                 raise ValueError("No requests provided for Action Handler")
 
@@ -841,9 +842,9 @@ class ActionTaskHandler(TaskHandler):
             else:
                 print("intent not found")
 
-            logger.info(f"Executing action: {actionId}")
+            logger.info(f"Executing action: {actionId} {query}")
             action = ActionHandler(config)
-            action_results = action.process_requests(intent, actionId)
+            action_results = action.process_requests(intent, actionId, query)
             logger.info(f"Action Handler: {action_results}")
             return {
                 'status': 'COMPLETED',
