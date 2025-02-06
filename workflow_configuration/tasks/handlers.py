@@ -512,7 +512,9 @@ class UserInputTaskHandler(TaskHandler):
 
             return {
                 'status': 'COMPLETED',
-                'output': result
+                'output': {
+                   "input": result
+                }
             }
         except Exception as e:
             logger.error(f"User input task failed: {str(e)}")
