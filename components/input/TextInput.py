@@ -28,13 +28,7 @@ class TextInput:
                 query = input(self.prompt).strip()
             logger.info(f"Received user query: {query}")
             
-            return {
-                'query': query,
-                'metadata': {
-                    'timestamp': None,  # Can be added if needed
-                    'source': 'user_input'
-                }
-            }
+            return query
             
         except Exception as e:
             logger.error(f"Error getting user input: {str(e)}")

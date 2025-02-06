@@ -53,15 +53,14 @@ class EmbeddingsGenerator:
 
     def _encode_with_openai(self, batch: List[str]) -> List[np.ndarray]:
 
-        query_value = batch[0]['query']
-        logger.info(f"Encoding {batch} texts with OpenAI {query_value}")
+        logger.info(f"Encoding {batch} texts with OpenAI")
         response = requests.post(
             'https://platforms-eastus-ai-stage07.openai.azure.com/openai/deployments/text-embedding-3-large-1/embeddings?api-version=2024-02-01',
             headers={
                 'Content-Type': 'application/json',
                 'api-key': os.getenv('AZURE_KEY')
             },
-            json={'input': query_value}
+            json={'input': batch}
         )
         if response.status_code == 200:
             embeddings = [item['embedding'] for item in response.json()['data']]

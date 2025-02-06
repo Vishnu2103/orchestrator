@@ -538,7 +538,7 @@ class VectorRetrieverTaskHandler(TaskHandler):
 
             # Get query from user_config's input_query reference
             query = task_input.get('user_config', {}).get('input_query')
-
+            logger.info(f"Retrieving context for query: {query}")
             if not query:
                 raise ValueError("No query provided for vector retrieval")
 
@@ -758,6 +758,7 @@ class DetectLanguageTaskHandler(TaskHandler):
 
             # Get texts from user_config's input_texts reference
             texts = task_input.get('user_config', {}).get('input_query')
+            logger.info(f"Detectinggg language for texts: {texts}")
             if not texts:
                 raise ValueError("No texts provided for language detection")
 

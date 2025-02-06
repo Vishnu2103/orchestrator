@@ -25,7 +25,7 @@ class DetectLanguage:
         }
 
     def detect_language(self, texts: List[str]) -> str:
-        logger.info(f"Detecting languages for {len(texts)} texts")
+        logger.info(f"Detecting languages for {len(texts)} texts {texts}")
         response = requests.post(
             self.api_url,
             headers=self.headers,
