@@ -14,7 +14,7 @@ class StateManager:
     
     def set_task_output(self, task_ref: str, output: Dict[str, Any]) -> None:
         """Store task output"""
-        logger.debug(f"Setting output for task {task_ref}: {output}")
+        logger.info(f"Setting output for task {task_ref}: {output}")
         self.task_outputs[task_ref] = output
     
     def set_task_error(self, task_ref: str, error: str) -> None:

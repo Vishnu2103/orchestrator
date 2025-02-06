@@ -65,6 +65,39 @@ class WorkflowManager:
         except Exception as e:
             logger.error(f"Failed to create workflow: {e}")
             raise
+
+    def create_workflow_internal(self, config: Dict) -> str:
+        """Create and start workflow execution
+
+        Args:
+            config: Workflow configuration
+
+        Returns:
+            str: Workflow ID
+        """
+        try:
+            # Generate workflow ID
+            workflow_id = str(uuid4())
+
+            # Initialize workflow state
+            self.state_store.initialize_workflow(workflow_id, config)
+
+            # Create observer
+            observer = WorkflowObserver(
+                workflow_id,
+                self.state_store,
+                self.event_bus
+            )
+
+            # Execute workflow directly
+            self._execute_workflow(workflow_id, config, observer)
+
+            logger.info(f"Started workflow {workflow_id}")
+            return workflow_id
+
+        except Exception as e:
+            logger.error(f"Failed to create workflow: {e}")
+            raise
     
     def get_workflow_status(self, workflow_id: str) -> Optional[Dict]:
         """Get current workflow status"""
