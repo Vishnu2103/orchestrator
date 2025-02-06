@@ -75,7 +75,7 @@ class VectorStore:
                         use_ssl=True,
                         verify_certs=True,
                         connection_class=RequestsHttpConnection
-                    ))
+                    )
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
                 self.store_vectors_func = self.store_vectors_os
