@@ -630,6 +630,117 @@ class OpenAITaskHandler(TaskHandler):
             }
 
 
+@TaskHandlerRegistry.register('gemini_handler')
+class OpenAITaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'openai_001'),
+                identifier='openai_handler',
+                user_config=task_input.get('user_config', {})
+            )
+
+            config.user_config['platform'] = 'gemini'
+            # Get inputs from user_config references
+            query = task_input.get('user_config', {}).get('input_query')
+            contexts = task_input.get('user_config', {}).get('input_contexts')
+            logger.info(f"Query: {query}, Contexts: {contexts}")
+            if not query or not contexts:
+                raise ValueError("Missing query or contexts for OpenAI handler")
+
+            handler = OpenAIHandler(config)
+            response = handler.generate_response(query, contexts)
+            logger.info(f"Generated openai_handler response: {response}")
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'response': response
+                }
+            }
+        except Exception as e:
+            logger.error(f"OpenAI task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('claude_handler')
+class OpenAITaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'openai_001'),
+                identifier='openai_handler',
+                user_config=task_input.get('user_config', {})
+            )
+
+            config.user_config['platform'] = 'claude'
+            # Get inputs from user_config references
+            query = task_input.get('user_config', {}).get('input_query')
+            contexts = task_input.get('user_config', {}).get('input_contexts')
+            logger.info(f"Query: {query}, Contexts: {contexts}")
+            if not query or not contexts:
+                raise ValueError("Missing query or contexts for OpenAI handler")
+
+            handler = OpenAIHandler(config)
+            response = handler.generate_response(query, contexts)
+            logger.info(f"Generated openai_handler response: {response}")
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'response': response
+                }
+            }
+        except Exception as e:
+            logger.error(f"OpenAI task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('openrouter_handler')
+class OpenAITaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'openai_001'),
+                identifier='openai_handler',
+                user_config=task_input.get('user_config', {})
+            )
+
+            config.user_config['platform'] = 'openrouter'
+            # Get inputs from user_config references
+            query = task_input.get('user_config', {}).get('input_query')
+            contexts = task_input.get('user_config', {}).get('input_contexts')
+            logger.info(f"Query: {query}, Contexts: {contexts}")
+            if not query or not contexts:
+                raise ValueError("Missing query or contexts for OpenAI handler")
+
+            handler = OpenAIHandler(config)
+            response = handler.generate_response(query, contexts)
+            logger.info(f"Generated openai_handler response: {response}")
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'response': response
+                }
+            }
+        except Exception as e:
+            logger.error(f"OpenAI task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
 @TaskHandlerRegistry.register('detect_language')
 class DetectLanguageTaskHandler(TaskHandler):
     def execute(self, task_input: Dict) -> Dict:
@@ -692,6 +803,40 @@ class TranslateLanguageTaskHandler(TaskHandler):
             }
         except Exception as e:
             logger.error(f"Translation task failed: {str(e)}")
+            return {
+                'status': 'FAILED',
+                'output': {
+                    'error': str(e)
+                }
+            }
+
+
+@TaskHandlerRegistry.register('action_handler')
+class ActionTaskHandler(TaskHandler):
+    def execute(self, task_input: Dict) -> Dict:
+        try:
+            config = ModuleConfig(
+                module_id=task_input.get('module_id', 'execute_action_001'),
+                identifier='execute_action',
+                user_config=task_input.get('user_config', {})
+            )
+
+            # Get texts from user_config's input_texts reference
+            requests = task_input.get('user_config', {}).get('input_contexts')
+            if not requests:
+                raise ValueError("No requests provided for Action Handler")
+
+            action = ActionTaskHandler(config)
+            action_results = action.process_requests()
+            logger.info(f"Action Handler: {action_results}")
+            return {
+                'status': 'COMPLETED',
+                'output': {
+                    'response': action_results
+                }
+            }
+        except Exception as e:
+            logger.error(f"Action Handler task failed: {str(e)}")
             return {
                 'status': 'FAILED',
                 'output': {
