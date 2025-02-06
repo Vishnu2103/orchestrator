@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 from elasticsearch import Elasticsearch
 from elasticsearch.connection import create_ssl_context
 import ssl
+import boto3
+from botocore.exceptions import NoCredentialsError
+from requests_aws4auth import AWS4Auth
 from opensearchpy import OpenSearch
 
 load_dotenv()
@@ -57,7 +60,22 @@ class VectorStore:
                         ssl_context=ssl_context,
                     )
                 else:
-                    self.store = OpenSearch([es_host])
+                    session = boto3.Session()
+                    credentials = session.get_credentials()
+                    auth = AWS4Auth(
+                        credentials.access_key,
+                        credentials.secret_key,
+                        session.region_name or "us-east-1",
+                        "es",
+                        session_token=credentials.token
+                    )
+                     self.store = OpenSearch(
+                        hosts=[es_host],
+                        http_auth=auth,
+                        use_ssl=True,
+                        verify_certs=True,
+                        connection_class=None
+                    ))
                 self.store.cluster.health(wait_for_status="yellow")
                 logging.info("Successfully connected to OpenSearch!")
                 self.store_vectors_func = self.store_vectors_os
