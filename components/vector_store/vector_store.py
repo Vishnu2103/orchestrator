@@ -58,7 +58,7 @@ class VectorStore:
                     )
                 else:
                     self.store = OpenSearch(
-                        hosts = [{'host': es_host, 'port': 443}]
+                        hosts = [es_host]
                         use_ssl = True
                     )
                     self.store.cluster.health()
