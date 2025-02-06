@@ -65,7 +65,7 @@ class ActionHandler:
                 logger.error(f"Error polling workflow status: {str(e)}")
                 raise
 
-    def process_requests(self, intent: str, actionId: str):
+    def process_requests(self, intent: str, actionId: str, query: str):
         """Process each request based on the action specified"""
         response = None
         for req in self.config.user_config['requests']:
@@ -90,7 +90,7 @@ class ActionHandler:
                         "user_input": {
                             "identifier": "user_input",
                             "user_config": {
-                                "query": "உலகில் மிகவும் வளர்ந்த நாடு எது?"
+                                "query": query
                             }
                         },
                         "vector_retriever": {
