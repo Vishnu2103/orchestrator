@@ -49,13 +49,17 @@ class WorkflowEngine:
                     inputs = self.state_manager.resolve_inputs(task.input_parameters)
                     
                     # Execute task
+
                     result = self.task_runner.execute_task(task, inputs)
+                    logger.info(f"Executing taskkk {task.reference_name} with result {result}")
                     
                     # Store output
                     self.state_manager.set_task_output(task.reference_name, result)
-                    
+                    logger.info(f"Task ref name{task.reference_name} State Manager TAsk output {self.state_manager.task_outputs}")
+                    logger.info(f"checking observer {len(self.observers)}")
                     # Notify observers of task completion
                     for obs in self.observers:
+                        logger.info(f"Task {task.reference_name} completed successfully {result}")
                         obs.on_module_complete(task.reference_name, result)
                         
                 except Exception as e:
@@ -85,9 +89,6 @@ class WorkflowEngine:
             
         except Exception as e:
             raise WorkflowExecutionError(str(e)) from e
-        finally:
-            # Clear observers
-            self.observers.clear()
     
     def get_task_outputs(self) -> Dict[str, Dict[str, Any]]:
         """Get all task outputs"""

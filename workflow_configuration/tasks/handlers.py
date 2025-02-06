@@ -1,6 +1,9 @@
+import json
 import logging
+import re
 from typing import Dict, Any
 
+from components.action.action import ActionHandler
 from components.chunker.LineChunker import LineChunker
 from components.chunker.SentenceSplitter import SentenceSplitter
 from components.language_component.detect_language import DetectLanguage, TranslateLanguage
@@ -571,7 +574,7 @@ class OpenAITaskHandler(TaskHandler):
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')
             logger.info(f"Query: {query}, Contexts: {contexts}")
-            if not query or not contexts:
+            if not query:
                 raise ValueError("Missing query or contexts for OpenAI handler")
 
             handler = OpenAIHandler(config)
@@ -608,8 +611,8 @@ class OpenAITaskHandler(TaskHandler):
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')
             logger.info(f"Query: {query}, Contexts: {contexts}")
-            if not query or not contexts:
-                raise ValueError("Missing query or contexts for OpenAI handler")
+            if not query:
+                raise ValueError("Missing query for OpenAI handler")
 
             handler = OpenAIHandler(config)
             response = handler.generate_response(query, contexts)
@@ -645,7 +648,7 @@ class OpenAITaskHandler(TaskHandler):
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')
             logger.info(f"Query: {query}, Contexts: {contexts}")
-            if not query or not contexts:
+            if not query:
                 raise ValueError("Missing query or contexts for OpenAI handler")
 
             handler = OpenAIHandler(config)
@@ -682,7 +685,7 @@ class OpenAITaskHandler(TaskHandler):
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')
             logger.info(f"Query: {query}, Contexts: {contexts}")
-            if not query or not contexts:
+            if not query:
                 raise ValueError("Missing query or contexts for OpenAI handler")
 
             handler = OpenAIHandler(config)
@@ -719,7 +722,7 @@ class OpenAITaskHandler(TaskHandler):
             query = task_input.get('user_config', {}).get('input_query')
             contexts = task_input.get('user_config', {}).get('input_contexts')
             logger.info(f"Query: {query}, Contexts: {contexts}")
-            if not query or not contexts:
+            if not query:
                 raise ValueError("Missing query or contexts for OpenAI handler")
 
             handler = OpenAIHandler(config)
@@ -817,22 +820,35 @@ class ActionTaskHandler(TaskHandler):
         try:
             config = ModuleConfig(
                 module_id=task_input.get('module_id', 'execute_action_001'),
-                identifier='execute_action',
+                identifier='action_handler',
                 user_config=task_input.get('user_config', {})
             )
 
             # Get texts from user_config's input_texts reference
-            requests = task_input.get('user_config', {}).get('input_contexts')
-            if not requests:
+            json_string = task_input.get('user_config', {}).get('input_contexts')
+            if not json_string:
                 raise ValueError("No requests provided for Action Handler")
 
-            action = ActionTaskHandler(config)
-            action_results = action.process_requests()
+            intent = re.search(r'["\']intent["\']:\s*["\']([^"\']*)["\']', json_string)
+            actionId = re.search(r'["\']actionId["\']:\s*["\']([^"\']*)["\']', json_string)
+            if actionId:
+                actionId = actionId.group(1)
+            else:
+                print("actionId not found")
+
+            if intent:
+                intent = intent.group(1)
+            else:
+                print("intent not found")
+
+            logger.info(f"Executing action: {actionId}")
+            action = ActionHandler(config)
+            action_results = action.process_requests(intent, actionId)
             logger.info(f"Action Handler: {action_results}")
             return {
                 'status': 'COMPLETED',
                 'output': {
-                    'response': action_results
+                    'action_response': action_results
                 }
             }
         except Exception as e:

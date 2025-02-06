@@ -42,22 +42,21 @@ class OpenAIHandler:
         """Generate a response using OpenAI"""
         try:
             start_time = time.time()
-
-            # Format context for the prompt
-            formatted_contexts = "\n\n".join([
-                f"Context (relevance score: {context['score']:.2f}):\n{context['text']}"
-                for context in contexts
-            ])
+            logger.info(f"Generating response for query: {query}")
+            if contexts is not None and len(contexts) > 0:
+                # Format context for the prompt
+                formatted_contexts = "\n\n".join([
+                    f"Context (relevance score: {context['score']:.2f}):\n{context['text']}"
+                    for context in contexts
+                ])
 
             messages = [
                 {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": f"""Question: {query}
-
-Available Context:
-{formatted_contexts}
-
-Please provide a response based on the above context."""}
+                {"role": "user", "content": f"""Question: {query}""" + (
+                    f" Available Context: {formatted_contexts} Please provide a response based on the above context." if contexts else " Please provide a response.")}
             ]
+
+            logger.info(f"Generating response for query: {query} with contexts: {contexts}")
 
             # Get completion from OpenAI
             response = self.client.chat.completions.create(
